@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import joblib
 
 model = joblib.load("student_model.pkl")
 scaler = joblib.load("scaler.pkl")
@@ -58,3 +57,4 @@ if st.button("Predict"):
         st.success("Student likely to PASS")
     else:
         st.error("Student likely to FAIL")
+
