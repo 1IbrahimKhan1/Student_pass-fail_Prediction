@@ -1,7 +1,12 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
+if not os.path.exists("student_model.pkl") or not os.path.exists("scaler.pkl"):
+    st.error("Model files not found. Please train the model first.")
+    st.stop()
+    
 model = joblib.load("student_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
@@ -58,3 +63,4 @@ if st.button("Predict"):
         st.success("Student likely to PASS")
     else:
         st.error("Student likely to FAIL")
+
