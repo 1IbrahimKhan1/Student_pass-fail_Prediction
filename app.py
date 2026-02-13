@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 
+# Load trained model
 model = joblib.load("student_model.pkl")
-scaler = joblib.load("scaler.pkl")
 
 st.title("Student Pass / Fail Predictor")
 
@@ -50,12 +50,13 @@ if st.button("Predict"):
         "Total Backlogs": total_backlogs
     }])
 
-    input_scaled = scaler.transform(input_df)
+    # Make prediction AFTER input_df is created
+    prediction = model.predict(input_df)
 
-    prediction = model.predict(input_scaled)[0]
-
-    if prediction == 1:
-        st.success("Student likely to PASS")
+    if prediction[0] == 1:
+        st.success("Student is likely to PASS")
     else:
-        st.error("Student likely to FAIL")
+        st.error("Student is likely to FAIL")
+
+
 
