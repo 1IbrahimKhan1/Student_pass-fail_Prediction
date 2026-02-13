@@ -1,30 +1,60 @@
-
 import streamlit as st
-import numpy as np
+import pandas as pd
 import joblib
 
 model = joblib.load("student_model.pkl")
+scaler = joblib.load("scaler.pkl")
 
-st.title("🎓 Student Pass / Fail Prediction")
+st.title("Student Pass / Fail Predictor")
 
-gender = st.selectbox("Gender (Encoded)", [0, 1])
-sem1_pass = st.number_input("Semester 1 Subjects Passed", 0, 10)
-sem1_fail = st.number_input("Semester 1 Subjects Failed", 0, 10)
-sem2_pass = st.number_input("Semester 2 Subjects Passed", 0, 10)
-sem2_fail = st.number_input("Semester 2 Subjects Failed", 0, 10)
-attendance = st.number_input("Attendance (%)", 0, 100)
-assign_rate = st.number_input("Assignment Submission Rate (%)", 0, 100)
-backlogs = st.number_input("Total Backlogs", 0, 10)
+gender = st.selectbox("Gender", ["Male", "Female"])
 
-if st.button("Predict Result"):
-    input_data = np.array([[gender, sem1_pass, sem1_fail,
-                            sem2_pass, sem2_fail,
-                            attendance, assign_rate,
-                            backlogs]])
+sem1_pass = st.number_input("Semester 1 Subjects Passed", 0, 11)
+sem1_fail = st.number_input("Semester 1 Subjects Failed", 0, 11)
 
-    prediction = model.predict(input_data)
+sem2_pass = st.number_input("Semester 2 Subjects Passed", 0, 11)
+sem2_fail = st.number_input("Semester 2 Subjects Failed", 0, 11)
 
-    if prediction[0] == 1:
-        st.success("✅ Student is likely to PASS")
+attendance = st.selectbox(
+    "Average Attendance Percentage",
+    ["Below 50%", "50%-65%", "66%-75%", "76%-85%", "Above 85%"]
+)
+
+assignment_rate = st.slider(
+    "Assignment Submission Rate (%)",
+    0, 100
+)
+
+total_backlogs = st.number_input("Total Backlogs", 0, 10)
+
+if st.button("Predict"):
+
+    gender_map = {"Female": 0, "Male": 1}
+
+    attendance_map = {
+        "Below 50%": 0,
+        "50%-65%": 1,
+        "66%-75%": 2,
+        "76%-85%": 3,
+        "Above 85%": 4
+    }
+
+    input_df = pd.DataFrame([{
+        "Gender": gender_map[gender],
+        "Semester 1 Subjects Passed": sem1_pass,
+        "Semester 1 Subjects Failed": sem1_fail,
+        "Semester 2 Subjects Passed": sem2_pass,
+        "Semester 2 Subjects Failed": sem2_fail,
+        "Average Attendance Percentage": attendance_map[attendance],
+        "Assignment Submission Rate (%)": assignment_rate,
+        "Total Backlogs": total_backlogs
+    }])
+
+    input_scaled = scaler.transform(input_df)
+
+    prediction = model.predict(input_scaled)[0]
+
+    if prediction == 1:
+        st.success("Student likely to PASS")
     else:
-        st.error("❌ Student is likely to FAIL")
+        st.error("Student likely to FAIL")
